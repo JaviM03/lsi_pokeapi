@@ -1,37 +1,48 @@
 <template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/images.png">
-    <h1>Pokedex</h1>
-    
-    
+  <div >
+   <img alt="Vue logo" src="../assets/images.png">
+    <div >
+      <pokemon-list
+        :pokemon-list="statePokemonList"
+        :favorites="stateFavoriteList"
+        @deleteFavorite="deleteFavorite"
+        @addFavorite="addFavorite"
+      />
+      <summary-favorites
+        :pokemon-list="statePokemonList"
+        :favorites="stateFavoriteList"
+        @addFavorite="addFavorite"
+        @eraseFavoritePokemonList="eraseFavoritePokemonList"
+      />
+    </div>
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-
-import axios from 'axios';
-
+import PokemonList from '@/components/ListaPokemon'
+import SummaryFavorites from '@/components/ListaFavorite'
+import { mapState, mapActions } from 'vuex'
 export default {
-  data(){
-    return{
-    name:'',
-    type: []
-    }
-  },
-  name: 'Home',
-  components: {
-    
-  },
-  methods:{
-     async getName(){
-       let pokemon = '1'
-       let datos = await axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemon}`)
-       console.log(datos.data.forms[0].name);
-     }
-  },
-   created(){
-    this.getName()
-  }
+    components: {
+        PokemonList,
+        SummaryFavorites,
+    },
+    computed: {
+        ...mapState(['statePokemonList', 'stateFavoriteList']),
+    },
+    async created() {
+        const pokemonData = await this.getPokemonData()
+        this.setPokemonData(pokemonData)
+    },
+    methods: {
+        async getPokemonData() {
+            const data = await fetch(
+                'https://pokeapi.co/api/v2/pokemon?limit=151'
+            )
+            const json = await data.json()
+            return json.results
+        },
+        ...mapActions(['setPokemonData', 'addFavorite', 'deleteFavorite', 'eraseFavoritePokemonList']),
+    },
 }
 </script>
